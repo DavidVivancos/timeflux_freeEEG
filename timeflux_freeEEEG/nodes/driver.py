@@ -35,7 +35,7 @@ def bytes_to_numbers(buffer, voltage,gain):
     return numbers
 
 class FreeEEG(Node):
-    """FreeEEG driver.
+      """FreeEEG driver.
 
         Attributes:
             o (Port): Default output, provides DataFrame.
@@ -44,8 +44,15 @@ class FreeEEG(Node):
             port (string): The serial port.
                 e.g. ``COM3`` on Windows;  ``/dev/cu.usbmodem14601`` on MacOS;
                 ``/dev/ttyUSB0`` on GNU/Linux.
-            device (string): The device Type
-                Allowed values: ``FreeEEG16``, ``FreeEEG32``, ``FreeEEG128``
+            bauds (int): speed of serial port
+                Allowed values: ``12000000``,``4000000``....
+            chnames (string): The device Type
+                Allowed values coma separated channel names: like "FP1,FPz,FP2,AFp1,AFPz,AFp2,AF7,AF3,AF4,AF8,AFF5h,AFF1h,AFF2h,AFF6h,F9,F7,F5,F3,F1,Fz,F2,F4,F6,F8,F10,FFT9h,FFT7h,FFC5h,FFC3h,FFC1h,FFC2h,FFC4h,FFC6h,FFT8h,FFT10h,FT9,FT7,FC5,FC3,FC1,FCz,FC2,FC4,FC6,FT8,FT10,FTT9h,FTT7h,FCC5h,FCC3h,FCC1h,FCC2h,FCC4h,FCC6h,FTT8h,FTT10h,T7,C5,C3,C1,Cz,C2,C4,C6,T8,TTP7h,CCP5h,CCP3h,CCP1h,CCP2h,CCP4h,CCP6h,TTP8h,TP9,TP7,CP5,CP3,Cpz,CP4,CP6,TP8,TP10,TPP9h,TPP7h,CPP5h,CPP3h,CPP1h,CPP2h,CPP4h,CPP6h,TPP8h,TPP10h,P9,P7,P5,P3,P1,Pz,P2,P4,P6,P8,P10,PPO9h,PPO5h,PPO1h,PPO2h,PPO6h,PPO10h,PO9,PO7,PO3,POz,PO4,PO8,PO10,POO9h,POO1,POO2,POO10h,O1,Oz,O2,OI1h,OI2h,I1,Iz,I2"
+                                                                   "Ch1,Ch2,Ch3,Ch4,Ch5,Ch6,Ch7,Ch8,Ch9,Ch10,Ch11,Ch12,Ch13,Ch14,Ch15,Ch16,Ch17,Ch18,Ch19,Ch20,Ch21,Ch22,Ch23,Ch24,Ch25,Ch26,Ch27,Ch28,Ch29,Ch30,Ch31,Ch32"
+            numc (int): number of channels
+                Allowed values: ``128``,``32``,``16``
+            vref (int): voltage for microvolt calc
+            gain (int): gain for microvolt calc
             rate (int): The device rate in Hz.
                 Allowed values: ``250``
         Example:
@@ -53,28 +60,15 @@ class FreeEEG(Node):
                :language: yaml
         """
 
-
-    #default for Freeeg128 for now
-    def __init__(self, port, device="FreeEEG128", rate=250):
-        if(device=="FreeEEG128"):
-            self.FreeEEG_chs = "FP1,FPz,FP2,AFp1,AFPz,AFp2,AF7,AF3,AF4,AF8,AFF5h,AFF1h,AFF2h,AFF6h,F9,F7,F5,F3,F1,Fz,F2,F4,F6,F8,F10,FFT9h,FFT7h,FFC5h,FFC3h,FFC1h,FFC2h,FFC4h,FFC6h,FFT8h,FFT10h,FT9,FT7,FC5,FC3,FC1,FCz,FC2,FC4,FC6,FT8,FT10,FTT9h,FTT7h,FCC5h,FCC3h,FCC1h,FCC2h,FCC4h,FCC6h,FTT8h,FTT10h,T7,C5,C3,C1,Cz,C2,C4,C6,T8,TTP7h,CCP5h,CCP3h,CCP1h,CCP2h,CCP4h,CCP6h,TTP8h,TP9,TP7,CP5,CP3,Cpz,CP4,CP6,TP8,TP10,TPP9h,TPP7h,CPP5h,CPP3h,CPP1h,CPP2h,CPP4h,CPP6h,TPP8h,TPP10h,P9,P7,P5,P3,P1,Pz,P2,P4,P6,P8,P10,PPO9h,PPO5h,PPO1h,PPO2h,PPO6h,PPO10h,PO9,PO7,PO3,POz,PO4,PO8,PO10,POO9h,POO1,POO2,POO10h,O1,Oz,O2,OI1h,OI2h,I1,Iz,I2"
-            self.numchs=128
-            self.VOLTAGE=2500000
-            self.GAIN = 32
-        if (device == "FreeEEG32"):
-            self.FreeEEG_chs = "Ch1,Ch2,Ch3,Ch4,Ch5,Ch6,Ch7,Ch8,Ch9,Ch10,Ch11,Ch12,Ch13,Ch14,Ch15,Ch16,Ch17,Ch18,Ch19,Ch20,Ch21,Ch22,Ch23,Ch24,Ch25,Ch26,Ch27,Ch28,Ch29,Ch30,Ch31,Ch32"
-            self.numchs = 32
-            self.VOLTAGE=2500000
-            self.GAIN = 32
-        if (device == "FreeEEG16"):
-            self.FreeEEG_chs = "Ch1,Ch2,Ch3,Ch4,Ch5,Ch6,Ch7,Ch8,Ch9,Ch10,Ch11,Ch12,Ch13,Ch14,Ch15,Ch16"
-            self.numchs = 16
-            self.VOLTAGE=2500000
-            self.GAIN = 32
-        self.names= self.FreeEEG_chs.split(",")
-
+   
+    def __init__(self, port, bauds,chnames,numc,vref=2500000,gain=32, rate=250):
+        self.names = self.chnames.split(",")
+        self.numchs = numc
+        self.VOLTAGE = vref
+        self.GAIN = gain
+        
         self.ser = serial.Serial()
-        self.ser.baudrate = 12000000
+        self.ser.baudrate = bauds
         self.ser.parity = serial.PARITY_NONE
         self.ser.stopbits = serial.STOPBITS_ONE
         self.ser.bytesize = serial.EIGHTBITS
