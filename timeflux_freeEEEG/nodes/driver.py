@@ -51,6 +51,7 @@ class FreeEEG(Node):
                                                                    "Ch1,Ch2,Ch3,Ch4,Ch5,Ch6,Ch7,Ch8,Ch9,Ch10,Ch11,Ch12,Ch13,Ch14,Ch15,Ch16,Ch17,Ch18,Ch19,Ch20,Ch21,Ch22,Ch23,Ch24,Ch25,Ch26,Ch27,Ch28,Ch29,Ch30,Ch31,Ch32"
             numc (int): number of channels
                 Allowed values: ``128``,``32``,``16``
+            auxchs (int): number of auxiliary channels not implemented
             vref (int): voltage for microvolt calc
             gain (int): gain for microvolt calc
             rate (int): The device rate in Hz.
@@ -61,11 +62,12 @@ class FreeEEG(Node):
         """
 
    
-    def __init__(self, port, bauds,chnames,numc,vref=2500000,gain=32, rate=250):
+    def __init__(self, port, bauds,chnames,numc,auxchs,vref=2500000,gain=32, rate=250):
         self.names = self.chnames.split(",")
         self.numchs = numc
         self.VOLTAGE = vref
         self.GAIN = gain
+        self.auxchs = auxchs
         
         self.ser = serial.Serial()
         self.ser.baudrate = bauds
